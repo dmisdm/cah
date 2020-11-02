@@ -25,7 +25,7 @@ export const PlayingCard = React.forwardRef(function PlayingCard(
     /** Height will be calculated automatically using theme.cardAspectRatio if you don't pass it. */
     height?: string;
     variant: "black" | "white";
-    text: string;
+    text: React.ReactNode;
     className?: string;
     elevation?: number;
     footer?: React.ReactNode;
@@ -35,6 +35,10 @@ export const PlayingCard = React.forwardRef(function PlayingCard(
   const theme = useTheme();
   const whiteColor = theme.whiteCardBackground;
   const width = props.width || "230px";
+  const text =
+    typeof props.text === "string"
+      ? props.text.replace(/_/g, "______")
+      : props.text;
   return (
     <Box
       clone
@@ -54,12 +58,10 @@ export const PlayingCard = React.forwardRef(function PlayingCard(
     >
       <Card ref={ref} elevation={props.elevation}>
         <Hidden xsDown>
-          <Typography variant="h6">
-            {props.text.replace(/_/g, "______")}
-          </Typography>
+          <Typography variant="h6">{text}</Typography>
         </Hidden>
         <Hidden smUp>
-          <Typography>{props.text.replace(/_/g, "______")}</Typography>
+          <Typography>{text}</Typography>
         </Hidden>
 
         <Padding flex={1} />

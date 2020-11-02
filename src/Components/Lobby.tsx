@@ -28,7 +28,11 @@ type Props = {
   minPlayers: number;
 };
 
-function PlayerListItem(props: { player: Player; isLeader: boolean }) {
+function PlayerListItem(props: {
+  player: Player;
+  isCurrentPlayer: boolean;
+  isLeader: boolean;
+}) {
   const avatarSvg = React.useMemo(
     () => avatars.create(props.player.id, { base64: true }),
     [props.player.id]
@@ -48,7 +52,12 @@ function PlayerListItem(props: { player: Player; isLeader: boolean }) {
         <Typography variant="subtitle2">{props.player.name}</Typography>
         <Padding flex={1} />
         {props.isLeader ? (
-          <Tooltip title="This user is the leader">
+          <Tooltip
+            title={
+              "This user is the leader" +
+              (props.isCurrentPlayer ? "...which is you" : "")
+            }
+          >
             <div>
               <RiMedal2Line size="1.5rem" />
             </div>
@@ -143,6 +152,7 @@ export const Lobby = React.forwardRef<HTMLFormElement, Props>(function Lobby(
             {playersList.map((player, i) => (
               <React.Fragment key={player.id}>
                 <PlayerListItem
+                  isCurrentPlayer={props.currentPlayer.id === player.id}
                   isLeader={player.id === props.leaderId}
                   player={player}
                 />

@@ -12,11 +12,11 @@ import * as t from "io-ts";
 import React from "react";
 import ReactJson from "react-json-view";
 import { AppError } from "./lib/AppError";
-import { CardSubmition, GameState, Player, WhiteCard } from "./common/Schema";
+import { CardSubmission, GameState, Player, WhiteCard } from "./common/Schema";
 import { Padding } from "./Components";
 import { IndexPage } from "./Pages/IndexPage";
 import { localPersistence, User } from "./Persistence";
-import { PlayingCard } from "./PlayingCard";
+import { PlayingCard } from "./Components";
 import { CAHRoom, orchestrator } from "./Repository";
 import { ProvideCAHThemeAndBaseline } from "./theme";
 
@@ -83,15 +83,15 @@ function Game({
   judge,
   blackCard,
   submitWhiteCards,
-  submitions,
+  submissions,
   decideWinner,
 }: Pick<
   GameState,
-  "players" | "roomId" | "status" | "judge" | "blackCard" | "submitions"
+  "players" | "roomId" | "status" | "judge" | "blackCard" | "submissions"
 > & {
   startGame: () => void;
   submitWhiteCards: (cards: WhiteCard[]) => void;
-  submitions: Record<string, CardSubmition | undefined>;
+  submissions: Record<string, CardSubmission | undefined>;
   player: Player;
   decideWinner: (sessionId: string) => void;
 }) {
@@ -175,13 +175,13 @@ function Game({
             <>
               <Typography>Youre the judge, so select a winner!</Typography>
               <MenuList>
-                {Object.values(submitions).map((submition) => (
+                {Object.values(submissions).map((submission) => (
                   <MenuItem
-                    onClick={() => decideWinner(submition.player.sessionId)}
+                    onClick={() => decideWinner(submission.player.sessionId)}
                     button
-                    key={submition.player.sessionId}
+                    key={submission.player.sessionId}
                   >
-                    {submition.cards.map((card) => card.text).join(",")}
+                    {submission.cards.map((card) => card.text).join(",")}
                   </MenuItem>
                 ))}
               </MenuList>
@@ -194,7 +194,7 @@ function Game({
         </>
       ) : null}
       <ReactJson
-        src={{ blackCard, player, status, judge, submitions, roomId }}
+        src={{ blackCard, player, status, judge, submissions, roomId }}
       />
     </Box>
   );
@@ -212,7 +212,7 @@ function App(props: {}) {
       | "judge"
       | "numberOfPlayers"
       | "blackCard"
-      | "submitions"
+      | "submissions"
     >
   >();
   const [currentUser, setCurrentUser] = React.useState<User>();
@@ -333,8 +333,8 @@ function App(props: {}) {
       submitWhiteCards={(cards) =>
         currentGame.send(["submitWhiteCards", cards])
       }
-      decideWinner={(submition) =>
-        currentGame.send(["decideWinner", submition])
+      decideWinner={(submission) =>
+        currentGame.send(["decideWinner", submission])
       }
       roomId={currentGameState.roomId}
       players={currentGameState.players}
@@ -342,7 +342,7 @@ function App(props: {}) {
       player={currentGameState.players[currentGame.sessionId]}
       judge={currentGameState.judge}
       blackCard={currentGameState.blackCard}
-      submitions={currentGameState.submitions}
+      submissions={currentGameState.submissions}
     />
   ); */
   return (

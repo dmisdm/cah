@@ -16,3 +16,10 @@ export type Card = {
 export type BlackCard = Card & {
   pick: 1 | 2;
 };
+
+export type Submission<B extends BlackCard = BlackCard> = {
+  picks: readonly Card[] & {
+    length: B["pick"];
+  };
+  blackCard: B;
+};

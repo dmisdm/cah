@@ -1,4 +1,4 @@
-import { IntroCard } from "../Components/IntroCard";
+import { IntroCard } from "./IntroCard";
 import React from "react";
 
 export default {

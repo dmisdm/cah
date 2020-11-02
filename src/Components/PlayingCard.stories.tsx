@@ -1,5 +1,5 @@
 import React from "react";
-import { PlayingCard } from "../Components";
+import { PlayingCard } from ".";
 import { Box } from "@material-ui/core";
 
 export default {

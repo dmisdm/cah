@@ -1,23 +1,10 @@
-import { Box, Button, makeStyles, useTheme } from "@material-ui/core";
+import { Box, makeStyles, useTheme } from "@material-ui/core";
 import useComponentSize from "@rehooks/component-size";
 import cx from "classnames";
 import React from "react";
-import { scrollIntoView } from "../lib/scrollIntoView";
 import { useDebouncedCallback } from "use-debounce";
-import { Padding, PlayingCard } from ".";
-import { Card } from "../types/DomainModels";
-const numberToOrdinal = (naturalNumber: number) => {
-  switch (naturalNumber) {
-    case 1:
-      return "1st";
-    case 2:
-      return "2nd";
-    case 3:
-      return "3rd";
-    default:
-      return `${naturalNumber}th`;
-  }
-};
+import { Padding } from ".";
+import { scrollIntoView } from "../lib/scrollIntoView";
 
 const cardHorizontalPadding = "2rem";
 const useStyles = makeStyles((theme) => ({
@@ -49,42 +36,36 @@ const useStyles = makeStyles((theme) => ({
       filter: "brightness(1.3)",
     },
   },
+  circleSvg: {
+    mixBlendMode: "difference",
+  },
 }));
 /**
  * A component responsible for rendering a hand of cards, and prompting the user to pick 1 or more of them.
  */
-export const CardChooser = React.memo(function CardChooser(props: {
+export function CardChooser<CardType, CardData>(props: {
+  cards: CardType[];
+  initialIndex: number;
+  Card: React.ComponentType<{
+    card: CardType;
+    width: string;
+    selected: boolean;
+    cardData: CardData;
+  }>;
+  cardData: CardData;
   /**
-   * The cards available to the user - NOT the state of the users hand, i.e. if the user picks cards, this component will prevent
-   * the user from selecting them again, it's not expected of you (the parent component) to manage this.
+   * Use this prop to stop the user from interacting, and just watch another user selecting a card.
+   * This prop controlls the current index of the card chooser component, and should change as the other user scrolls.
    */
-  cards: Card[];
-  /**
-   * The number of required cards to be picked
-   */
-  pickCount: number;
-  onPicked: (card: Card) => void;
-  /**
-   * The next card position the user is required to choose.
-   */
-  nextPickIndex: number;
-  /**
-   * The ordered set of cards that have been picked.
-   */
-  picked: (Card | undefined)[];
+  spectatingIndex?: number;
 }) {
+  const { cards, initialIndex, cardData } = props;
+
   const theme = useTheme();
-  const currentHand = React.useMemo(
-    () =>
-      props.cards.filter(
-        (card) => !props.picked.find((pick) => pick?.text === card.text)
-      ),
-    [props.cards, props.picked]
-  );
+
   const classes = useStyles();
-  const [cardIndex, setCardIndex] = React.useState(
-    Math.floor(currentHand.length / 2)
-  );
+
+  const [cardIndex, setCardIndex] = React.useState(Math.floor(initialIndex));
   const [snappedIndex, setSnappedIndex] = React.useState(cardIndex);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const scrollingToIndex = React.useRef(false);
@@ -101,7 +82,7 @@ export const CardChooser = React.memo(function CardChooser(props: {
   );
   const scrollToIndex = React.useCallback(
     (index: number) => {
-      if (!(index >= 0 && index < currentHand.length)) return;
+      if (!(index >= 0 && index < cards.length)) return;
 
       scrollingToIndex.current = true;
       if (containerRef.current) {
@@ -114,7 +95,7 @@ export const CardChooser = React.memo(function CardChooser(props: {
             },
             {
               time: 200,
-              validTarget: function(_, parentsScrolled) {
+              validTarget: function (_, parentsScrolled) {
                 return parentsScrolled < 3;
               },
             },
@@ -126,14 +107,17 @@ export const CardChooser = React.memo(function CardChooser(props: {
         }
       }
     },
-    [cardIndexToScrollLeft, currentHand.length]
+    [cardIndexToScrollLeft, cards.length]
   );
 
   const invisibleCardAtEdgesWidth =
     (size.width || 1) / 2 - cardWidthWithPadding / 2;
-  const [snapScroll] = useDebouncedCallback(setSnappedIndex, 100);
+  const snapScroll = useDebouncedCallback(setSnappedIndex, 100);
   const onScroll = React.useCallback(
     (e: React.UIEvent) => {
+      if (props.spectatingIndex !== undefined) {
+        e.preventDefault();
+      }
       if (scrollingToIndex.current) return;
       const indexFloat =
         (e.currentTarget.scrollLeft + cardWidthWithPadding / 2) /
@@ -146,12 +130,18 @@ export const CardChooser = React.memo(function CardChooser(props: {
         setSnappedIndex(-1);
       }
 
-      snapScroll(newCardIndex);
+      snapScroll.callback(newCardIndex);
       /*    if (indexFloat % 1 === 0.5) {
       setCardIndex(newCardIndex);
     } */
     },
-    [cardIndex, cardWidthWithPadding, snapScroll, snappedIndex]
+    [
+      cardIndex,
+      cardWidthWithPadding,
+      props.spectatingIndex,
+      snapScroll,
+      snappedIndex,
+    ]
   );
 
   React.useEffect(() => {
@@ -172,7 +162,7 @@ export const CardChooser = React.memo(function CardChooser(props: {
           },
           {
             time: 200,
-            validTarget: function(_, parentsScrolled) {
+            validTarget: function (_, parentsScrolled) {
               return parentsScrolled < 3;
             },
           }
@@ -194,33 +184,18 @@ export const CardChooser = React.memo(function CardChooser(props: {
           {/* Invisible block that centers the left most card */}
           <Box width={invisibleCardAtEdgesWidth} />
 
-          {currentHand.map((card, i) => {
+          {cards.map((card, i) => {
             const selected = i === cardIndex;
             return (
               <div
                 key={i}
                 className={cx(classes.card, selected && classes.middleCard)}
               >
-                <PlayingCard
+                <props.Card
+                  card={card}
                   width={width}
-                  elevation={selected ? 5 : undefined}
-                  variant="white"
-                  text={card.text}
-                  footer={
-                    selected ? (
-                      <Box display="flex" justifyContent="flex-end">
-                        <Button
-                          variant="outlined"
-                          color="primary"
-                          onClick={() => props.onPicked(card)}
-                        >
-                          {props.pickCount <= 1
-                            ? "Pick"
-                            : numberToOrdinal(props.nextPickIndex + 1)}
-                        </Button>
-                      </Box>
-                    ) : null
-                  }
+                  selected={selected}
+                  cardData={cardData}
                 />
               </div>
             );
@@ -231,7 +206,7 @@ export const CardChooser = React.memo(function CardChooser(props: {
       </div>
       <Padding size={2} />
       <Box display="flex" justifyContent="space-around" paddingX="1rem">
-        {currentHand.map((card, index) => (
+        {cards.map((card, index) => (
           <div key={index}>
             <svg
               className={classes.cardIndexIndicatorCircle}
@@ -241,10 +216,12 @@ export const CardChooser = React.memo(function CardChooser(props: {
               onClick={() => scrollToIndex(index)}
             >
               <circle
+                className={classes.circleSvg}
                 cx="50%"
                 cy="50%"
                 r={50}
-                fill={cardIndex === index ? "white" : "#777"}
+                /* Will use mixBlendMode: difference, meaning it will work on black or white backgrounds */
+                fill={cardIndex === index ? "white" : "#7b7b7b"}
               />
             </svg>
           </div>
@@ -252,4 +229,4 @@ export const CardChooser = React.memo(function CardChooser(props: {
       </Box>
     </Box>
   );
-});
+}

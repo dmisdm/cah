@@ -39,7 +39,7 @@ const useLayoutStyles = makeStyles((theme) => ({
 }));
 type Props = {
   variant: "white" | "black";
-  heading: React.ReactNode;
+  heading?: React.ReactNode;
   body: React.ReactNode;
   bodyClass?: string;
   footer?: React.ReactNode;
@@ -52,7 +52,7 @@ export const CardLayout = React.forwardRef<HTMLFormElement, Props>(
     return (
       <form ref={ref} className={styles.container} onSubmit={props.onSubmit}>
         <Card elevation={3} className={styles.card}>
-          <Box flex={1}>{props.heading}</Box>
+          {props.heading ? <Box flex={1}>{props.heading}</Box> : null}
           <Padding />
           <Box flex={10} overflow="auto" className={props.bodyClass}>
             {props.body}

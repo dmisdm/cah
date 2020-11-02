@@ -56,7 +56,7 @@ export class Player extends Schema {
   }
 }
 
-export class CardSubmition extends Schema {
+export class CardSubmission extends Schema {
   @type(Player)
   player: Player;
   @type([WhiteCard])
@@ -86,8 +86,8 @@ export class GameState extends Schema {
   judge?: string;
   @type(BlackCard)
   blackCard?: BlackCard;
-  @type({ map: CardSubmition })
-  submitions = new GameMapSchema<CardSubmition>();
+  @type({ map: CardSubmission })
+  submissions = new GameMapSchema<CardSubmission>();
   @type("uint8")
   numberOfPlayers: number = 0;
   @type("uint8")
@@ -144,26 +144,26 @@ export class GameState extends Schema {
     this.blackCard = nextBlackCard;
   };
 
-  public submitCards = (submition: CardSubmition) => {
+  public submitCards = (submission: CardSubmission) => {
     if (this.status === "submittingCards") {
-      this.submitions[submition.player.sessionId] = submition;
-      if (Object.values(this.submitions).length >= this.numberOfPlayers - 1) {
+      this.submissions[submission.player.sessionId] = submission;
+      if (Object.values(this.submissions).length >= this.numberOfPlayers - 1) {
         this.status = "judging";
       }
     }
   };
 
-  public decideWinner = (submition: CardSubmition) => {
+  public decideWinner = (submission: CardSubmission) => {
     if (this.status === "judging" && this.blackCard) {
-      const player = this.players[submition.player.sessionId];
-      this.players[submition.player.sessionId] = new Player({
+      const player = this.players[submission.player.sessionId];
+      this.players[submission.player.sessionId] = new Player({
         ...player,
         blackCards: new ArraySchema(this.blackCard, ...player.blackCards),
       });
 
       //TODO: Put binned cards in a pile
-      Object.keys(this.submitions).forEach((k) => {
-        delete this.submitions[k];
+      Object.keys(this.submissions).forEach((k) => {
+        delete this.submissions[k];
       });
       this.nextTurn();
     }

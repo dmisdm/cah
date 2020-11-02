@@ -1,4 +1,4 @@
-import { Lobby } from "../Components/Lobby";
+import { Lobby } from "./Lobby";
 import React from "react";
 import { otherPlayers, defaultPlayer } from "./dummy";
 

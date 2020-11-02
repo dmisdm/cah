@@ -1,5 +1,5 @@
 import React from "react";
-import { ChooseWhiteCard } from "../Components/ChooseWhiteCard";
+import { ChooseWhiteCard } from "./ChooseWhiteCard";
 import {
   otherPlayers,
   defaultPlayer,

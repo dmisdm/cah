@@ -1,4 +1,4 @@
-import { Player } from "../types/DomainModels";
+import { Player, Submission } from "../types/DomainModels";
 
 export const dummyHand = [
   { text: "Making a pouty face." },
@@ -59,3 +59,26 @@ export const doublePickBlackCard = {
   text: "And the Academy Award for _ goes to _.",
   pick: 2,
 } as const;
+
+export const dummySubmissions: Submission<typeof blackCard>[] = [
+  {
+    blackCard,
+    picks: [{ text: "Grandma" }] as const,
+  },
+  {
+    blackCard,
+    picks: [{ text: "German dungeon porn" }] as const,
+  },
+  {
+    blackCard,
+    picks: [{ text: "Ethnic cleansing" }] as const,
+  },
+  {
+    blackCard,
+    picks: [{ text: "The penny whistle song from Titanic" }] as const,
+  },
+  {
+    blackCard,
+    picks: [{ text: "Nick Cage" }] as const,
+  },
+];

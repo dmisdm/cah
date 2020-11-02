@@ -1,4 +1,4 @@
-import { JoinOrCreate } from "../Components/JoinOrCreate";
+import { JoinOrCreate } from "./JoinOrCreate";
 import { action } from "@storybook/addon-actions";
 import React from "react";
 
