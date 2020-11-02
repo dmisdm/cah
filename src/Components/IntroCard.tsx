@@ -30,7 +30,7 @@ export const IntroCard = React.forwardRef<HTMLFormElement, Props>(
 
     const generateRandomName = React.useCallback(() => {
       setLoadingName(true);
-      fetch("http://api.urbandictionary.com/v0/random")
+      fetch("https://api.urbandictionary.com/v0/random")
         .then((res) => res.json())
         .then((data) => {
           setLoadingName(false);

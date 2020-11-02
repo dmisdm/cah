@@ -3,10 +3,10 @@ import { Subject, Observable } from "rxjs";
 import { AppError } from "./lib/AppError";
 import { Session } from "./Persistence";
 import { MatchMakeError } from "colyseus.js/lib/Client";
-import { GameState, MessageType } from "./common/Schema";
+import { GameState } from "./common/Schema";
 
 export class CAHRoom extends Colyseus.Room<GameState> {
-  send(data: MessageType) {
+  send(data: string) {
     super.send(data);
   }
 }
